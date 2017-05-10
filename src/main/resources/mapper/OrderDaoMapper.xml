@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.imooc.dao.OrderDao">
+
+    <insert id="saveOrder" parameterType="Order">
+      <!--忽略主键冲突报的错-->
+      INSERT IGNORE INTO order_detail(user_id,seckill_id,status)
+      value (#{userId,jdbcType=VARCHAR},#{seckillId},0)
+    </insert>
+
+    <select id="queryOrderWithSeckillById" parameterType="Order" resultType="Order">
+        SELECT
+            od.user_id,
+            od.seckill_id,
+            od.status,
+            od.create_time,
+            sk.seckill_id "seckill.seckill_id",
+            sk.name "seckill.name",
+            sk.number "seckill.number",
+            sk.start_time "seckill.start_time",
+            sk.end_time "seckill.end_time",
+            sk.create_time "seckill.create_time"
+        FROM seckill sk
+        INNER JOIN order_detail od
+              on sk.seckill_id = od.seckill_id
+        and od.seckill_id = #{seckillId}
+        and od.user_id = #{userId}
+
+    </select>
+
+</mapper>

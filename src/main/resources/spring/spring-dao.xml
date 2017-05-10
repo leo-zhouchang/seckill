@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- bean definitions here -->
+    <!--1.数据库相关配置-->
+    <context:property-placeholder location="classpath*:jdbc.properties" />
+
+    <!--2.数据源-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <!--数据库链接属性-->
+        <property name="driverClass" value="${driver}" />
+        <property name="jdbcUrl" value="${url}" />
+        <property name="user" value="${leo}" />
+        <property name="password" value="${pwd}" />
+
+        <!--c3p0 私有属性-->
+        <property name="maxPoolSize" value="30" />
+        <property name="minPoolSize" value="10" />
+        <!--拿不到连接 等待1000ms-->
+        <property name="checkoutTimeout" value="1000" />
+        <!--关闭连接 不自动提交-->
+        <property name="autoCommitOnClose" value="false" />
+        <!--拿不到连接 尝试两次-->
+        <property name="acquireRetryAttempts" value="2" />
+    </bean>
+
+    <!--3. sessionfactory配置-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" p:dataSource-ref="dataSource">
+        <!--注入数据源-->
+        <!--<property name="dataSource"  >-->
+            <!--<ref bean="dataSource" />-->
+        <!--</property>-->
+        <!--加载mybatis全局属性文件-->
+        <property name="configLocation" value="classpath:mybatis-config.xml" />
+        <!--扫描对象名 作为别名-->
+        <property name="typeAliasesPackage" value="com.imooc.model" />
+        <!--扫描 Mapper 文件-->
+        <property name="mapperLocations" value="classpath:mapper/*Mapper.xml" />
+
+    </bean>
+
+    <!--4.配置dao接口扫描-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <!--扫描接口包的位置-->
+        <property name="basePackage" value="com.imooc.dao" />
+    </bean>
+
+    <bean id="redisDao" class="com.imooc.dao.RedisDao">
+        <constructor-arg index="0" value="127.0.0.1"/>
+        <constructor-arg index="1" value="6379" />
+    </bean>
+</beans>
